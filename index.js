@@ -27,7 +27,8 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const serviceCollection = client.db("car").collection("services")
+    const serviceCollection = client.db("car").collection("services");
+    const checkoutCollection = client.db("car").collection("checkout");
 
     app.get('/services', async(req, res)=>{
       const cursor = serviceCollection.find()
@@ -35,6 +36,7 @@ async function run() {
       res.send(result);
 
     })
+
     app.get('/services/:id',async(req, res)=>{
 
       const id = req.params.id;
@@ -44,6 +46,15 @@ async function run() {
       };
       const result = await serviceCollection.findOne(query, options);
       res.send(result)
+    })
+
+    app.post('/checkout', async(req, res)=>{
+
+      const checkout = req.body;
+      console.log(checkout)
+      const result = await checkoutCollection.insertOne(checkout);
+      res.send(result);
+
     })
 
     // Send a ping to confirm a successful connection
