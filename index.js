@@ -55,7 +55,7 @@ async function run() {
 // token api for valid auth
 app.post('/jwt',(req,res)=>{
   const user = req.body;  
-  console.log(user);
+  // console.log(user);
   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
   res.send({token});
 
@@ -91,6 +91,11 @@ app.post('/jwt',(req,res)=>{
       // console.log(req.headers.authorization);
       const decoded = req.decoded;
       console.log('come back decoded', decoded)
+      console.log(decoded.email)
+      if(decoded.email !== req.query.email){
+        return res.status(403).send({error:1, message:'forbidden access'})
+      }
+
       let query = {};
       if (req.query?.email) {
         query = { email: req.query.email };
