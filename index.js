@@ -20,6 +20,14 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+//test token generate system
+app.post('/gen-jwt',(req, res)=>{
+
+  const user = req.body;
+  console.log({user});
+  const token = jwt.sign( user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'3h'})
+  res.send({token})
+})
 
 //token verify function for booking
 const verifyjwt =(req, res, next)=>{
