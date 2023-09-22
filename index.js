@@ -69,7 +69,11 @@ const verifyjwt = (req, res, next)=>{
     return res.status(401).send({error:true, message:"Unaithorize access"})
   }
   const token = authorization.split(' ')[1];
-  jwt.verify()
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,(err, decoded)=>{
+    if(err){
+      return res.status(403).send({err:true, message:"user access forbidden"})
+    }
+  })
 }
 
 async function run() {
