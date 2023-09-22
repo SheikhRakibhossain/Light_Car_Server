@@ -47,10 +47,8 @@ res.send({token})
 //   if(!authorization){
 //     res.status(401).send({error:true, message:"unauthorization access"})
 //   }
-
 //   const token = authorization.split(' ')[1];
 //   console.log('token inside backend jwt verify', token);
-
 //   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded)=>{
 //     if(error){
 //       res.status(403).send({error:true, message:'unauthorize access'})
@@ -58,12 +56,9 @@ res.send({token})
 //     req.decoded = decoded;
 //     next();
 //   })
-
-
 // }
 
 const verifyjwt = (req, res, next)=>{
-
   const authorization = req.headers.authorization;
   if(!authorization){
     return res.status(401).send({error:true, message:"Unaithorize access"})
@@ -72,7 +67,11 @@ const verifyjwt = (req, res, next)=>{
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,(err, decoded)=>{
     if(err){
       return res.status(403).send({err:true, message:"user access forbidden"})
-    }
+    };
+    req.decoded = decoded;
+    console.log(decoded);
+    console.log(req.decoded)
+    next();
   })
 }
 
