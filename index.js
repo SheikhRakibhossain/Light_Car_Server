@@ -30,32 +30,46 @@ app.post('/gen-jwt',(req, res)=>{
 //jwt auth verify 
 app.post('/jwt', (req, res)=>{
 
-  const body = req.body;
-console.log({body})
+const body = req.body;
+console.log({body});
+const token = jwt.sign(body, process.env.ACCESS_TOKEN_SECRET, {
+  expiresIn:"2h"
+})
+res.send({token})
 
 })
 
-//token verify function for booking
-const verifyjwt =(req, res, next)=>{
-  // console.log('jwt hitting');
-  // console.log(req.headers.authorization);
+// //token verify function for booking
+// const verifyjwt =(req, res, next)=>{
+//   // console.log('jwt hitting');
+//   // console.log(req.headers.authorization);
+//   const authorization = req.headers.authorization;
+//   if(!authorization){
+//     res.status(401).send({error:true, message:"unauthorization access"})
+//   }
+
+//   const token = authorization.split(' ')[1];
+//   console.log('token inside backend jwt verify', token);
+
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded)=>{
+//     if(error){
+//       res.status(403).send({error:true, message:'unauthorize access'})
+//     };
+//     req.decoded = decoded;
+//     next();
+//   })
+
+
+// }
+
+const verifyjwt = (req, res, next)=>{
+
   const authorization = req.headers.authorization;
   if(!authorization){
-    res.status(401).send({error:true, message:"unauthorization access"})
+    return res.status(401).send({error:true, message:"Unaithorize access"})
   }
-
   const token = authorization.split(' ')[1];
-  console.log('token inside backend jwt verify', token);
-
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded)=>{
-    if(error){
-      res.status(403).send({error:true, message:'unauthorize access'})
-    };
-    req.decoded = decoded;
-    next();
-  })
-
-
+  jwt.verify()
 }
 
 async function run() {
