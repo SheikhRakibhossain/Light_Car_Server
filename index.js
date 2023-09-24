@@ -4,7 +4,7 @@ require("dotenv").config();
 const port = process.env.PORT || 5000;
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-var jwt = require('jsonwebtoken');
+var jwt = require("jsonwebtoken");
 
 //middle ware
 app.use(cors());
@@ -21,61 +21,44 @@ const client = new MongoClient(uri, {
   },
 });
 //test token generate system
-app.post('/gen-jwt',(req, res)=>{
+app.post("/gen-jwt", (req, res) => {
   const user = req.body;
-  console.log({user});
-  const token = jwt.sign( user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'3h'})
-  res.send({token})
-})
-//jwt auth verify 
-app.post('/jwt', (req, res)=>{
+  console.log({ user });
+  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: "3h",
+  });
+  res.send({ token });
+});
+//jwt auth verify
+app.post("/jwt", (req, res) => {
+  const body = req.body;
+  console.log({ body });
+  const token = jwt.sign(body, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: "2h",
+  });
+  res.send({ token });
+});
 
-const body = req.body;
-console.log({body});
-const token = jwt.sign(body, process.env.ACCESS_TOKEN_SECRET, {
-  expiresIn:"2h"
-})
-res.send({token})
-
-})
-
-// //token verify function for booking
-// const verifyjwt =(req, res, next)=>{
-//   // console.log('jwt hitting');
-//   // console.log(req.headers.authorization);
-//   const authorization = req.headers.authorization;
-//   if(!authorization){
-//     res.status(401).send({error:true, message:"unauthorization access"})
-//   }
-//   const token = authorization.split(' ')[1];
-//   console.log('token inside backend jwt verify', token);
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded)=>{
-//     if(error){
-//       res.status(403).send({error:true, message:'unauthorize access'})
-//     };
-//     req.decoded = decoded;
-//     next();
-//   })
-// }
-
-const verifyjwt = (req, res, next)=>{
+const verifyjwt = (req, res, next) => {
   const authorization = req.headers.authorization;
   console.log(headers);
   console.log(authorization);
-  if(!authorization){
-    return res.status(401).send({error:true, message:"Unaithorize access"})
+  if (!authorization) {
+    return res.status(401).send({ error: true, message: "Unaithorize access" });
   }
-  const token = authorization.split(' ')[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,(err, decoded)=>{
-    if(err){
-      return res.status(403).send({err:true, message:"user access forbidden"})
-    };
+  const token = authorization.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res
+        .status(403)
+        .send({ err: true, message: "user access forbidden" });
+    }
     req.decoded = decoded;
     console.log(decoded);
-    console.log(req.decoded)
+    console.log(req.decoded);
     next();
-  })
-}
+  });
+};
 
 async function run() {
   try {
@@ -84,18 +67,19 @@ async function run() {
 
     const serviceCollection = client.db("car").collection("services");
     const checkoutCollection = client.db("car").collection("checkout");
+    const projectCollection = client.db("car").collection("success");
 
-// token api for valid auth
-app.post('/jwt',(req,res)=>{
-  const user = req.body;  
-  // console.log(user);
-  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-  res.send({token});
+    // token api for valid auth
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      // console.log(user);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res.send({ token });
+    });
 
-})
-
-
-//service api for cleint view
+    //service api for cleint view
     app.get("/services", async (req, res) => {
       const cursor = serviceCollection.find();
       const result = await cursor.toArray();
@@ -120,13 +104,13 @@ app.post('/jwt',(req,res)=>{
     });
 
     //get some booking data from checkout
-    app.get("/checkout", verifyjwt , async (req, res) => {
+    app.get("/checkout", verifyjwt, async (req, res) => {
       // console.log(req.headers.authorization);
       const decoded = req.decoded;
-      console.log('come back decoded', decoded)
-      console.log(decoded.email)
-      if(decoded.email !== req.query.email){
-        return res.status(403).send({error:1, message:'forbidden access'})
+      console.log("come back decoded", decoded);
+      console.log(decoded.email);
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ error: 1, message: "forbidden access" });
       }
 
       let query = {};
@@ -141,17 +125,15 @@ app.post('/jwt',(req,res)=>{
     app.patch("/checkout/:id", async (req, res) => {
       const id = req.params.id;
       const updatedCheckout = req.body;
-      const filter = {_id: new ObjectId(id)}
+      const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
-          status: updatedCheckout.status
+          status: updatedCheckout.status,
         },
       };
       console.log(updatedCheckout);
-      const result = await checkoutCollection.updateOne(filter, updateDoc)
+      const result = await checkoutCollection.updateOne(filter, updateDoc);
       res.send(result);
-
-
     });
 
     //delete checkout booking data api
@@ -161,6 +143,13 @@ app.post('/jwt',(req,res)=>{
       const result = await checkoutCollection.deleteOne(query);
       res.send(result);
     });
+
+    //car services completed projects related api
+    app.get('/completed-projects', async(req, res)=>{
+      const result = await projectCollection.find().toArray();
+      res.send(result);
+
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
