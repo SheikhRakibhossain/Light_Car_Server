@@ -105,7 +105,7 @@ async function run() {
 
     //get some booking data from checkout
     app.get("/checkout", verifyjwt, async (req, res) => {
-      // console.log(req.headers.authorization);
+      console.log(req.headers.authorization);
       const decoded = req.decoded;
       console.log("come back decoded", decoded);
       console.log(decoded.email);
@@ -150,7 +150,12 @@ async function run() {
       res.send(result);
 
     })
+//filter api for review orderd
+app.post('/booked',async()=>{
 
+const body = req.body;
+console.log(body)
+})
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
