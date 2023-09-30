@@ -168,6 +168,10 @@ console.log(body)
 }
 run().catch(console.dir);
 
+//captcha function
+
+
+
 app.get("/", (req, res) => {
   res.send("Light Car Server is running on there or here..!");
 });
